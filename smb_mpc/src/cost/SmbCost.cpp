@@ -48,6 +48,13 @@ ad_vector_t SmbCost::costVectorFunction(ad_scalar_t time,
   /// the desired setpoint. For Task 3, keep the values set in L33-34 You can
   /// use the weight matricies QPosition, QOrientation and R for Task 4.
 
+  // Task 2: Hard coded goal position
+  // desiredPosition << (ad_scalar_t)2.0, (ad_scalar_t)5.0, (ad_scalar_t)0.0;
+  // desiredOrientation = ad_quat_t(ad_angle_axis_t((ad_scalar_t)M_PI/2, ad_vec3_t::UnitZ()));
+
+  positionError = QPosition * (currentPosition - desiredPosition);
+  orientationError = QOrientation * (desiredOrientation.conjugate() * currentOrientation).vec();
+  inputError = R * input;
 
   ad_vector_t totalCost(positionError.size() + orientationError.size() +
                         inputError.size());
@@ -74,6 +81,35 @@ SmbCost::getParameters(scalar_t time,
     // Eigen::Vector3d to get the reference position.
     // desiredTimeTrajectory is an std::vector<double> of the reference
     // timestamps.
+
+    // First check the edge cases:
+    if (desiredTimeTrajectory.front() > time) {
+      referencePosition =
+      SmbConversions::readPosition(desiredStateTrajectory.front());
+      referenceOrientation =
+      SmbConversions::readRotation(desiredStateTrajectory.front());
+    } else if (desiredTimeTrajectory.back() < time) {
+      referencePosition =
+      SmbConversions::readPosition(desiredStateTrajectory.back());
+      referenceOrientation =
+      SmbConversions::readRotation(desiredStateTrajectory.back());
+    } else {
+      // find the index of the time stamp behind our current time stamps
+      int i = 0;
+      while (i < numPoses && desiredTimeTrajectory[i] < time) {
+        i++;
+      }
+
+      double t0 = desiredTimeTrajectory[i - 1];
+      double t1 = desiredTimeTrajectory[i];
+      double alpha = (time - t0) / (t1 - t0);
+      Eigen::VectorXd s0 = desiredStateTrajectory[i - 1];
+      Eigen::VectorXd s1 = desiredStateTrajectory[i];
+      referencePosition = (1 - alpha) * SmbConversions::readPosition(s0) +
+      alpha * SmbConversions::readPosition(s1);
+      referenceOrientation = SmbConversions::readRotation(s0).slerp(
+      alpha, SmbConversions::readRotation(s1));
+    }
 
   } else { // desiredStateTrajectory.size() == 1, Do not change this
     referencePosition = SmbConversions::readPosition(desiredStateTrajectory[0]);
