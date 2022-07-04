@@ -84,7 +84,6 @@ SmbCost::getParameters(scalar_t time,
     // desiredTimeTrajectory is an std::vector<double> of the reference
     // timestamps.
 
-<<<<<<< HEAD
     // First check the edge cases:
     if (desiredTimeTrajectory.front() > time) {
       referencePosition =
@@ -114,41 +113,6 @@ SmbCost::getParameters(scalar_t time,
       alpha, SmbConversions::readRotation(s1));
     }
 
-=======
-    /// First check the edge cases:
-    if (desiredTimeTrajectory.front() > time) {
-    referencePosition =
-    SmbConversions::readPosition(desiredStateTrajectory.front());
-    referenceOrientation =
-    SmbConversions::readRotation(desiredStateTrajectory.front());
-    } else if (desiredTimeTrajectory.back() < time) {
-    referencePosition =
-    SmbConversions::readPosition(desiredStateTrajectory.back());
-    referenceOrientation =
-    SmbConversions::readRotation(desiredStateTrajectory.back());
-    } else {
-    // find the index of the time stamp behind our current time stamps
-    int i = 0;
-    while (i < numPoses && desiredTimeTrajectory[i] < time) {
-    i++;
-    }
-
-    double t0 = desiredTimeTrajectory[i - 1];
-    double t1 = desiredTimeTrajectory[i];
-    double alpha = (time - t0) / (t1 - t0);
-    Eigen::VectorXd s0 = desiredStateTrajectory[i - 1];
-    Eigen::VectorXd s1 = desiredStateTrajectory[i];
-    referencePosition = (1 - alpha) * SmbConversions::readPosition(s0) +
-    alpha * SmbConversions::readPosition(s1);
-    referenceOrientation = SmbConversions::readRotation(s0).slerp(
-    alpha, SmbConversions::readRotation(s1));
-
-    }
-
-    
-
-
->>>>>>> abff802116b158f3077ffdf3070c66095cba212e
   } else { // desiredStateTrajectory.size() == 1, Do not change this
     referencePosition = SmbConversions::readPosition(desiredStateTrajectory[0]);
     referenceOrientation =
