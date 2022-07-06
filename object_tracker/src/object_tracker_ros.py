@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import numpy as np
-from geometry_msgs.msg import PoseArray, Pose
-from object_detection_msgs.msg import ObjectDetectionInfoArray
+from object_detection_msgs.msg import ObjectDetectionInfoArray, ObjectDetectionInfo
 import tf2_ros
 import tf2_geometry_msgs
 
@@ -12,7 +11,7 @@ class ObjectTrackerROS:
     def __init__(self, fixed_frame_id, object_poses_topic, tracked_object_topic, confidence_thres, gating_threshold, filter_type, kalman_R, kalman_Q):
         # Initialize Subscriber and Publisher
         self.sub = rospy.Subscriber(object_poses_topic, ObjectDetectionInfoArray, self.callback)
-        self.pub = rospy.Publisher(tracked_object_topic, PoseArray, queue_size=10)
+        self.pub = rospy.Publisher(tracked_object_topic, ObjectDetectionInfoArray, queue_size=10)
         
         # Initialize TF Listener
         self.tf_buffer = tf2_ros.Buffer()
@@ -61,19 +60,21 @@ class ObjectTrackerROS:
 
         tracked_objects = self.object_tracker.run(detections)
 
-        tracked_objects_ros = PoseArray()
+        tracked_objects_ros = ObjectDetectionInfoArray()
         tracked_objects_ros.header.stamp = rospy.Time.now()
         tracked_objects_ros.header.frame_id = self.fixed_frame_id
 
-        for object in tracked_objects:
-            p = Pose()
-            p.position.x = object[0]
-            p.position.y = object[1]
-            p.position.z = object[2]
+        for class_ in tracked_objects:
+            for object, num_of_occur in zip(tracked_objects[class_]["poses"],tracked_objects[class_]["num_of_occur"]) :
+                p = ObjectDetectionInfo()
+                p.position.x = object[0]
+                p.position.y = object[1]
+                p.position.z = object[2]
 
-            p.orientation.w = 1.0
+                p.class_id = class_
+                p.id = num_of_occur
 
-            tracked_objects_ros.poses.append(p)
+                tracked_objects_ros.info.append(p)
 
         self.pub.publish(tracked_objects_ros)
 

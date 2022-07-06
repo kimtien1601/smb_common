@@ -4,6 +4,19 @@ from filterpy.kalman import KalmanFilter
 from median_filter import MedianFilter
 import numpy as np
 
+class TrackedObject:
+    
+    def __init__(self, filter_):
+        self.filter = filter_
+        self.number_of_occurrence = 0
+    
+    def update(self, value):
+        self.filter.update(value)
+        self.number_of_occurrence+=1
+    
+    def predict(self):
+        self.filter.predict()
+
 class ObjectTracker:
 
     def __init__(self, gating_threshold, kalman_R, kalman_Q, filter_type):
@@ -28,7 +41,7 @@ class ObjectTracker:
     def initialize_new_tracked_object(self, non_gated_detections, class_id):
 
         for new_object in non_gated_detections:
-            self.tracked_objects[class_id].append(self.initialize_kalman_filter(new_object))
+            self.tracked_objects[class_id].append(TrackedObject(self.initialize_kalman_filter(new_object)))
 
     def initialize_kalman_filter(self, initial_position):
         if self.filter_type == "kalman":
@@ -78,12 +91,12 @@ class ObjectTracker:
 
             self.run_class(detections[class_], class_)        
 
-        object_array = []
+        tracked_objects = {}
         print("-----------------------------------")
         for class_ in self.tracked_objects:
             print(class_, len(self.tracked_objects[class_]))
-            object_array += [f.x for f in self.tracked_objects[class_]]
+            tracked_objects[class_]["poses"] = np.array([f.filter.x for f in self.tracked_objects[class_]]).reshape(-1,3)
+            tracked_objects[class_]["num_of_occur"] = np.array([f.number_of_occurrence for f in self.tracked_objects[class_]])
         print("-----------------------------------")
 
-
-        return np.array(object_array).reshape(-1,3)
+        return tracked_objects
