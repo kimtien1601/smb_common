@@ -59,7 +59,7 @@ class ObjectTracker:
             f.Q *= self.kalman_Q
 
         elif self.filter_type == "median" or self.filter_type == "mean":
-            f = MedianFilter(initial_position)
+            f = MedianFilter(initial_position, self.filter_type)
 
         return f
 
@@ -70,7 +70,7 @@ class ObjectTracker:
             tracked_object.predict()
 
         ## Run Hungarian Assigner
-        tracked_object_poses = np.array([f.x for f in self.tracked_objects[class_id]]).reshape((-1,3))
+        tracked_object_poses = np.array([f.filter.x for f in self.tracked_objects[class_id]]).reshape((-1,3))
         assignment_costs, assignments = self.hungarian_assigner(tracked_object_poses, detections)
 
         ## Find the gated objects
@@ -97,8 +97,10 @@ class ObjectTracker:
         print("-----------------------------------")
         for class_ in self.tracked_objects:
             print(class_, len(self.tracked_objects[class_]))
-            tracked_objects[class_]["poses"] = np.array([f.filter.x for f in self.tracked_objects[class_]]).reshape(-1,3)
-            tracked_objects[class_]["num_of_occur"] = np.array([f.number_of_occurrence for f in self.tracked_objects[class_]])
+            tracked_objects[class_] = {
+                "poses" : np.array([f.filter.x for f in self.tracked_objects[class_]]).reshape(-1,3),
+                "num_of_occur" : np.array([f.number_of_occurrence for f in self.tracked_objects[class_]])
+            }
         print("-----------------------------------")
 
         ObjectTracker.generate_csv(tracked_objects)
@@ -108,11 +110,22 @@ class ObjectTracker:
     @staticmethod
     def generate_csv(tracked_objects):
 
-        data = []
+        data = {
+            "class": [],
+            "x": [],
+            "y": [],
+            "z": [],
+            "num_occur": []
+        }
         for class_ in tracked_objects:
             for object, num_occur in zip(tracked_objects[class_]["poses"],tracked_objects[class_]["num_of_occur"]):
-                data.append([class_, object[0], object[1], object[2], num_occur])
-        df = pd.DataFrame(data, ["class", "x", "y", "z", "num_occur"])
+                data["class"].append(class_)
+                data["x"].append(object[0])
+                data["y"].append(object[1])
+                data["z"].append(object[2])
+                data["num_occur"].append(num_occur)
+        
+        df = pd.DataFrame(data)
 
-        output_path  = os.path.join(os.path.abspath( __file__ ),"../output/object_detections.csv")
+        output_path  = os.path.join(os.path.abspath( os.path.dirname( __file__ ) ), "../output/object_detections.csv")
         df.to_csv(output_path, index=False)

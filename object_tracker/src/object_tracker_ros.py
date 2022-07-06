@@ -86,8 +86,8 @@ if __name__ == '__main__':
         "/object_detector/detection_info", # Object Poses Topic
         "/object_detector/tracked_objects", # Tracked Objects Topic
         0.6, # Confidence Threshold
-        5, # Gating Threshold in Meters
-        "kalman", # Filtering Type
+        2, # Gating Threshold in Meters
+        "mean", # Filtering Type
         1, # Kalman R
         0.1) # Kalman Q
     
