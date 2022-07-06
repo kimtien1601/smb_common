@@ -2,6 +2,7 @@
 <launch>
 
   <arg name="sim"                default="true"/>
+  <arg name="launch_gazebo_gui"  default="false"/>
 
   <!-- mpc -->
   <arg name="mpc"
@@ -13,20 +14,21 @@
        doc="Track the plan published from the mpc_path_publisher.py script in smb_mpc package."/>
 
   <!-- smb_slam arguments -->
-  <arg name="map_name"            default="map.pcd" /> 
+  <arg name="map_name"            default="sim.pcd" /> 
   <arg name="pcd_filepath"        default="$(find smb_slam)/maps/$(arg map_name)" />
 
   <!-- smb_navigation arguments -->
-  <arg name="use_global_map"     default="false"/>
+  <arg name="use_global_map"     default="true"/>
   <arg name="global_frame"       default="map"/>
 
     <!-- smb_navigation navigate2d -->
     <arg name="navigate2d"
-        default="false"/>
+        default="true"/>
 
   <!-- start smb_gazebo launch -->
   <include file="$(find smb_gazebo)/launch/sim.launch">
     <arg name="mpc"                      value="$(arg mpc)"/>
+    <arg name="launch_gazebo_gui"                      value="$(arg launch_gazebo_gui)"/>
   </include>
 
   <!-- start smb_slam launch -->
@@ -39,7 +41,7 @@
   <group if="$(arg navigate2d)">
     <include file="$(find smb_navigation)/launch/navigate2d_ompl.launch">
       <arg name="use_global_map"    value="$(arg use_global_map)"/>
-      <arg name="global_frame"      value="$(arg use_global_map)"/>
+      <arg name="global_frame"      value="$(arg global_frame)"/>
       <arg name="sim"               value="$(arg sim)"/>
     </include>
   </group>
