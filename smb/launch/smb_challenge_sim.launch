@@ -25,8 +25,10 @@
     <!-- smb_navigation navigate2d -->
     <arg name="navigate2d"
         default="true"/>
-  <!-- relocation publisher -->
+  <!-- relocation publisher change this after measurement-->
   <node pkg="smb_slam" type="relocalize.py" name="relocalize_tf_publisher"></node>
+  <!-- <node pkg="tf" type="static_transform_publisher" name="challenge_tf_broadcaster" args="-4.11 8.77 0 0 0 0.68 0.73 map challenge_tf 100" /> -->
+
   <!-- start smb_gazebo launch -->
   <include file="$(find smb_gazebo)/launch/sim.launch">
     <arg name="mpc"                      value="$(arg mpc)"/>
