@@ -61,6 +61,8 @@ class ObjectTrackerROS:
             p.position.y = object[1]
             p.position.z = object[2]
 
+            p.orientation.w = 1.0
+
             tracked_objects_ros.poses.append(p)
 
         self.pub.publish(tracked_objects_ros)
