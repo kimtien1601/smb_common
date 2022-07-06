@@ -25,7 +25,8 @@
     <!-- smb_navigation navigate2d -->
     <arg name="navigate2d"
         default="true"/>
-
+  <!-- relocation publisher -->
+  <node pkg="smb_slam" type="relocalize.py" name="relocalize_tf_publisher"></node>
   <!-- start smb_gazebo launch -->
   <include file="$(find smb_gazebo)/launch/sim.launch">
     <arg name="mpc"                      value="$(arg mpc)"/>
