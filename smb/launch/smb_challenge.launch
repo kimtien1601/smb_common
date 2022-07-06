@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
 
-  <arg name="sim"                default="true"/>
-
   <!-- mpc -->
   <arg name="mpc"
        default="false"
@@ -15,6 +13,7 @@
   <!-- smb_slam arguments -->
   <arg name="map_name"            default="map.pcd" /> 
   <arg name="pcd_filepath"        default="$(find smb_slam)/maps/$(arg map_name)" />
+  <arg name="global_map"        default="$(find smb_navigation)/data/real/map.yaml" />
 
   <!-- smb_navigation arguments -->
   <arg name="use_global_map"     default="false"/>
@@ -41,9 +40,9 @@
 
   <!-- start smb_navigation navigate2d launch -->
   <group if="$(arg navigate2d)">
-    <include file="$(find smb_navigation)/launch/navigate2d_ompl.launch">
+    <include file="$(find smb_navigation)/launch/navigate2d.launch">
       <arg name="use_global_map"    value="$(arg use_global_map)"/>
-      <arg name="global_frame"      value="$(arg use_global_map)"/>
+      <arg name="global_frame"      value="$(arg global_frame)"/>
       <arg name="sim"               value="$(arg sim)"/>
       <arg name="global_map"        value="$(arg global_map)"/>
     </include>
