@@ -3,6 +3,8 @@ from scipy.spatial.distance import cdist
 from filterpy.kalman import KalmanFilter
 from median_filter import MedianFilter
 import numpy as np
+import pandas as pd
+import os
 
 class TrackedObject:
     
@@ -99,4 +101,18 @@ class ObjectTracker:
             tracked_objects[class_]["num_of_occur"] = np.array([f.number_of_occurrence for f in self.tracked_objects[class_]])
         print("-----------------------------------")
 
+        ObjectTracker.generate_csv(tracked_objects)
+
         return tracked_objects
+
+    @staticmethod
+    def generate_csv(tracked_objects):
+
+        data = []
+        for class_ in tracked_objects:
+            for object, num_occur in zip(tracked_objects[class_]["poses"],tracked_objects[class_]["num_of_occur"]):
+                data.append([class_, object[0], object[1], object[2], num_occur])
+        df = pd.DataFrame(data, ["class", "x", "y", "z", "num_occur"])
+
+        output_path  = os.path.join(os.path.abspath( __file__ ),"../output/object_detections.csv")
+        df.to_csv(output_path, index=False)
