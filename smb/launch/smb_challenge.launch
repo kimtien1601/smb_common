@@ -19,10 +19,6 @@
   <arg name="use_global_map"     default="false"/>
   <arg name="global_frame"       default="map"/>
 
-    <!-- smb_navigation navigate2d -->
-    <arg name="navigate2d"
-        default="false"/>
-
   <!-- start smb launch -->
   <include file="$(find smb)/launch/smb.launch">
     <arg name="mpc"                      value="$(arg mpc)"/>
@@ -32,18 +28,16 @@
   <include file="$(find smb_slam)/launch/localization.launch">
     <arg name="map_name"                      value="$(arg map_name)"/>
     <arg name="pcd_filepath"                  value="$(arg pcd_filepath)"/>
-    <arg name="global_map"            default="$(find smb_navigation)/data/real/map.yaml"/>
   </include>
   <!-- relocation publisher change this after measurement-->
-  <node pkg="smb_slam" type="relocalize.py" name="relocalize_tf_publisher"></node>
+  <!-- <node pkg="smb_slam" type="relocalize.py" name="relocalize_tf_publisher"></node> -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="challenge_tf_broadcaster" args="-4.11 8.77 0 0 0 0.68 0.73 map challenge_tf 100" /> -->
 
   <!-- msf -->
-  <include file="$(find open3d_slam_ros)/launch/mapping.launch"></include>
   <include file="$(find smb_msf)/launch/smb_msf.launch">
     <arg name="use_sim_time"                      value="false"/>
     <arg name="imu_topic"                         value="/imu0"/>
-    <arg name="pose_topic"                         value="/mapping_node/scan2map_transform"/>
+    <arg name="pose_topic"                         value="/range_sensor_transform/"/>
   </include>
 
   <!-- start smb_navigation navigate2d launch -->
