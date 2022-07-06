@@ -43,7 +43,7 @@ class ObjectTracker:
             f.P *= f.R
             f.Q *= self.kalman_Q
 
-        elif self.filter_type == "median":
+        elif self.filter_type == "median" or self.filter_type == "mean":
             f = MedianFilter(initial_position)
 
         return f
