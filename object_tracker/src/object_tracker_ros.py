@@ -2,30 +2,32 @@
 import rospy
 import numpy as np
 from geometry_msgs.msg import PoseArray, Pose
-
+from object_detection_msgs.msg import ObjectDetectionInfoArray
 import tf2_ros
 import tf2_geometry_msgs
 
 from object_tracker import ObjectTracker
 
 class ObjectTrackerROS:
-    def __init__(self, fixed_frame_id, object_poses_topic, tracked_object_topic, gating_threshold, kalman_R, kalman_Q):
+    def __init__(self, fixed_frame_id, object_poses_topic, tracked_object_topic, confidence_thres, gating_threshold, filter_type, kalman_R, kalman_Q):
         # Initialize Subscriber and Publisher
-        self.sub = rospy.Subscriber(object_poses_topic, PoseArray, self.callback)
+        self.sub = rospy.Subscriber(object_poses_topic, ObjectDetectionInfoArray, self.callback)
         self.pub = rospy.Publisher(tracked_object_topic, PoseArray, queue_size=10)
         
         # Initialize TF Listener
         self.tf_buffer = tf2_ros.Buffer()
         self.listener = tf2_ros.TransformListener(self.tf_buffer)
         self.fixed_frame_id = fixed_frame_id
+        self.confidence_thres = confidence_thres
 
         # Initialize Object Tracker
-        self.object_tracker = ObjectTracker(gating_threshold, kalman_R, kalman_Q)
+        self.object_tracker = ObjectTracker(gating_threshold, kalman_R, kalman_Q, filter_type)
 
-    def transform_object_to_fixed_frame(self, object_pose, object_frame, object_stamp):
+    def transform_object_to_fixed_frame(self, object_pos, object_frame, object_stamp):
 
         pose_stamped = tf2_geometry_msgs.PoseStamped()
-        pose_stamped.pose = object_pose
+        pose_stamped.pose.position = object_pos
+        pose_stamped.pose.orientation.w = 1.0
         pose_stamped.header.frame_id = object_frame
         pose_stamped.header.stamp = object_stamp
 
@@ -39,15 +41,23 @@ class ObjectTrackerROS:
 
 
     def callback(self, msg):
-        detected_objects = []
-        for object_pose in msg.poses:
-            detected_objects.append(
-                self.transform_object_to_fixed_frame(
-                    object_pose, 
-                    msg.header.frame_id, 
-                    msg.header.stamp))
+        detections = {}
+        for object_ in msg.info:
+            if object_.confidence < self.confidence_thres:
+                continue
+            
+            detected_object = self.transform_object_to_fixed_frame(
+                object_.position, 
+                msg.header.frame_id, 
+                msg.header.stamp)
+            
+            if object_.class_id not in detections:
+                detections[object_.class_id] = []
 
-        detections =  np.array(detected_objects).reshape(-1,3)
+            detections[object_.class_id].append(detected_object)
+
+        for class_id in detections:
+            detections[class_id] =  np.array(detections[class_id]).reshape(-1,3)
 
         tracked_objects = self.object_tracker.run(detections)
 
@@ -71,10 +81,12 @@ if __name__ == '__main__':
     rospy.init_node('object_tracker')
     
     ObjectTrackerROS(
-        "tracking_camera_odom", # Target Frame
-        "/object_detector/object_poses", # Object Poses Topic
+        "map", # Target Frame
+        "/object_detector/detection_info", # Object Poses Topic
         "/object_detector/tracked_objects", # Tracked Objects Topic
-        0.15, # Gating Threshold in Meters
+        0.6, # Confidence Threshold
+        5, # Gating Threshold in Meters
+        "kalman", # Filtering Type
         1, # Kalman R
         0.1) # Kalman Q
     
