@@ -10,7 +10,7 @@ class TrackedObject:
     
     def __init__(self, filter_):
         self.filter = filter_
-        self.number_of_occurrence = 0
+        self.number_of_occurrence = 1
     
     def update(self, value):
         self.filter.update(value)
