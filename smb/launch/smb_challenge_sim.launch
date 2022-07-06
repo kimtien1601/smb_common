@@ -16,7 +16,8 @@
   <!-- smb_slam arguments -->
   <arg name="map_name"            default="sim.pcd" /> 
   <arg name="pcd_filepath"        default="$(find smb_slam)/maps/$(arg map_name)" />
-
+  <arg name="global_map"         default="$(find smb_navigation)/data/simulation/map.yaml"/>
+  
   <!-- smb_navigation arguments -->
   <arg name="use_global_map"     default="true"/>
   <arg name="global_frame"       default="map"/>
@@ -43,6 +44,7 @@
       <arg name="use_global_map"    value="$(arg use_global_map)"/>
       <arg name="global_frame"      value="$(arg global_frame)"/>
       <arg name="sim"               value="$(arg sim)"/>
+      <arg name="global_map"        value="$(arg global_map)"/>
     </include>
   </group>
 
