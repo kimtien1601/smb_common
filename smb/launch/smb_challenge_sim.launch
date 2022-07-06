@@ -28,7 +28,14 @@
   <!-- relocation publisher change this after measurement-->
   <node pkg="smb_slam" type="relocalize.py" name="relocalize_tf_publisher"></node>
   <!-- <node pkg="tf" type="static_transform_publisher" name="challenge_tf_broadcaster" args="-4.11 8.77 0 0 0 0.68 0.73 map challenge_tf 100" /> -->
-
+  <node pkg="tf" type="static_transform_publisher" name="challenge_tf_broadcaster" args="0 0 0 0 0 0 range_sensor range_sensor_o3d 100" />
+  <!-- msf -->
+  <include file="$(find open3d_slam_ros)/launch/mapping.launch"></include>
+  <include file="$(find smb_msf)/launch/smb_msf.launch">
+    <arg name="use_sim_time"                      value="true"/>
+    <arg name="imu_topic"                         value="/imu0"/>
+    <arg name="pose_topic"                         value="/mapping_node/scan2map_transform"/>
+  </include>
   <!-- start smb_gazebo launch -->
   <include file="$(find smb_gazebo)/launch/sim.launch">
     <arg name="mpc"                      value="$(arg mpc)"/>

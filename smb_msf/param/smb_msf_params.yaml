@@ -1,6 +1,6 @@
-core/data_playback: true             # Set to true for playback, set to false on the real system.
+core/data_playback: false             # Set to true for playback, set to false on the real system.
 core/msf_output_frame: map           # Set MSF output frame
-core/msf_state_frame: msf_imu_state
+core/msf_state_frame: imu
 ##############################
 #########IMU PARAMETERS#######
 ##############################

@@ -30,6 +30,6 @@
     <node pkg="tf" type="static_transform_publisher" name="map_to_map_o3d" respawn="true" args="0 0 0 0 0 0 map map_o3d 100" />
 
     <!-- RVIZ -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find smb_msf)/rviz/smb.rviz" required="true" if="$(arg launch_rviz)"/>
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find smb_msf)/rviz/smb.rviz" required="true" if="$(arg launch_rviz)"/> -->
 
 </launch>

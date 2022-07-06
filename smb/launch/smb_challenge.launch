@@ -39,6 +39,14 @@
   <node pkg="smb_slam" type="relocalize.py" name="relocalize_tf_publisher"></node>
   <!-- <node pkg="tf" type="static_transform_publisher" name="challenge_tf_broadcaster" args="-4.11 8.77 0 0 0 0.68 0.73 map challenge_tf 100" /> -->
 
+  <!-- msf -->
+  <include file="$(find open3d_slam_ros)/launch/mapping.launch"></include>
+  <include file="$(find smb_msf)/launch/smb_msf.launch">
+    <arg name="use_sim_time"                      value="false"/>
+    <arg name="imu_topic"                         value="/imu0"/>
+    <arg name="pose_topic"                         value="/mapping_node/scan2map_transform"/>
+  </include>
+
   <!-- start smb_navigation navigate2d launch -->
   <group if="$(arg navigate2d)">
     <include file="$(find smb_navigation)/launch/navigate2d_ompl.launch">
